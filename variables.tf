@@ -1,8 +1,8 @@
 variable "AMI1" {
     type = map
     default = {
-        amazonlinux = "ami-08bdc08970fcbd34a"
-        ubuntu = "ami-01ded35841bc93d7f"
+        vio-amilinux = "ami-08bdc08970fcbd34a"
+        vio-ubuntu = "ami-01ded35841bc93d7f"
     }
 }
 
