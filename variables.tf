@@ -7,7 +7,7 @@ variable "AMI" {
 }
 
 variable "AWS_Region" {
-    default = "eu-central-1"
+    default = "eu-north-1"
 }
 
 variable "instance_type" {
@@ -15,53 +15,17 @@ variable "instance_type" {
 }
 
 variable "vpc_cidr_block" {
-    default = "10.9.0.0/16"
+    default = "10.10.0.0/16"
 }
 
-variable "subnet_public_1_cidr_block" {
-    default = "10.9.1.0/24"
+variable "availability_zones" {
+    default = {
+        eu-central-1a = 1
+        eu-central-1b = 2
+        eu-central-1c = 3
+    }
 }
 
-variable "subnet_public_1_availability_zone" {
-    default = "eu-central-1a"
-}
-
-variable "subnet_public_2_cidr_block" {
-    default = "10.9.2.0/24"
-}
-
-variable "subnet_public_2_availability_zone" {
-    default = "eu-central-1b"
-}
-
-variable "subnet_public_3_cidr_block" {
-    default = "10.9.3.0/24"
-}
-
-variable "subnet_public_3_availability_zone" {
-    default = "eu-central-1c"
-}
-
-variable "web1_key_name" {
-    default = "key123"
-}
-
-variable "web2_key_name" {
-    default = "key123"
-}
-
-variable "web3_key_name" {
-    default = "key123"
-}
-
-variable "web4_key_name" {
-    default = "key123"
-}
-
-variable "web5_key_name" {
-    default = "key123"
-}
-
-variable "web6_key_name" {
-    default = "key123"
+variable "web_key_name" {
+    default = "lunakey"
 }
