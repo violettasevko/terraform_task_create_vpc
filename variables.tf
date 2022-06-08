@@ -1,8 +1,9 @@
-variable "AMI" {
+variable "AMI1" {
     type = map
     default = {
-        eu-central-1 = "ami-07cd3675e7ca644fe"
-        eu-north-1 = "ami-0adfc82c1ad9f327b"
+        AmazonLinux = "ami-0e5a288df830e9b56"
+        #Ubuntu = "ami-0641bed8c0ce71686"
+        #eu-north-1 = "ami-0e5a288df830e9b56"
     }
 }
 
@@ -20,9 +21,9 @@ variable "vpc_cidr_block" {
 
 variable "availability_zones" {
     default = {
-        eu-central-1a = 1
-        eu-central-1b = 2
-        eu-central-1c = 3
+        eu-north-1a = 1
+        eu-north-1b = 2
+        eu-north-1c = 3
     }
 }
 
