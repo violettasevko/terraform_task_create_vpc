@@ -2,7 +2,7 @@ terraform {
   required_providers {
     aws = {
       source = "hashicorp/aws"
-      version = "4.17.1"
+      version = "4.17.1"    #8-6-2022
     }
   }
 }
@@ -11,13 +11,13 @@ provider "aws" {
   # Configuration options
 }
 
-resource "aws_vpc" "main" {
+resource "aws_vpc" "vio-tf-vpc" {    #vpc created by terraform
   cidr_block       = var.vpc_cidr_block
   assign_generated_ipv6_cidr_block = "true"
   instance_tenancy = "default"
 
   tags = {
-    Name = "main"
+    Name = "vio-tf-vpc"
     owner = "violetta"
   }
 }
@@ -25,48 +25,48 @@ resource "aws_vpc" "main" {
 resource "aws_subnet" "subnet_public" {
     for_each = var.availability_zones
 
-    vpc_id = "${aws_vpc.main.id}"
+    vpc_id = "${aws_vpc.vio-tf-vpc.id}"
 
 
     availability_zone = each.key
-    cidr_block        = cidrsubnet(aws_vpc.main.cidr_block, 8, each.value)
-    ipv6_cidr_block   = cidrsubnet(aws_vpc.main.ipv6_cidr_block, 8, each.value + 6)
-
-
+    cidr_block        = cidrsubnet(aws_vpc.vio-tf-vpc.cidr_block, 8, each.value)
+    ipv6_cidr_block   = cidrsubnet(aws_vpc.vio-tf-vpc.ipv6_cidr_block, 8, each.value + 6)
  
     map_public_ip_on_launch = "true" //it makes this a public subnet
     assign_ipv6_address_on_creation = true
 
     tags = {
         Name = "subnet-public-${each.value}"
-
+        owner = "violetta"
     }
 }
 
 resource "aws_subnet" "subnet_private" {
     for_each = var.availability_zones
 
-    vpc_id = "${aws_vpc.main.id}"
+    vpc_id = "${aws_vpc.vio-tf-vpc.id}"
 
     availability_zone = each.key
-    cidr_block        = cidrsubnet(aws_vpc.main.cidr_block, 8, each.value + 10)
+    cidr_block        = cidrsubnet(aws_vpc.vio-tf-vpc.cidr_block, 8, each.value + 10)
 
     map_public_ip_on_launch = "true" //it makes this a private subnet
 
     tags = {
         Name = "subnet-private-${each.value + 10}"
+        owner = "violetta"
     }
 }
 
 resource "aws_internet_gateway" "igw" {
-    vpc_id = "${aws_vpc.main.id}"
+    vpc_id = "${aws_vpc.vio-tf-vpc.id}"
     tags = {
         Name = "igw"
+        owner = "violetta"
     }
 }
 
 resource "aws_route_table" "public-rt" {
-    vpc_id = "${aws_vpc.main.id}"
+    vpc_id = "${aws_vpc.vio-tf-vpc.id}"
     
     route {
         //associated subnet can reach everywhere
@@ -77,6 +77,7 @@ resource "aws_route_table" "public-rt" {
     
     tags = {
         Name = "public-rt"
+        owner = "violetta"
     }
 }
 
@@ -90,7 +91,7 @@ resource "aws_route_table_association" "rta-public-subnet"{
 }
 
 resource "aws_security_group" "webserver" {
-    vpc_id = "${aws_vpc.main.id}"
+    vpc_id = "${aws_vpc.vio-tf-vpc.id}"
     name = "Webserver"
     
     egress {
@@ -158,13 +159,14 @@ resource "aws_security_group" "webserver" {
     }
     tags = {
         Name = "webserver"
+        owner = "violetta"
     }
 }
 
 resource "aws_instance" "amazonlinux" {
     #for_each = var.availability_zones
 
-    ami = "${lookup(var.AMI1, "amazonlinux")}"
+    ami = "${lookup(var.AMI1, "vio-amilinux")}"
     instance_type = var.instance_type
     # VPC
     subnet_id = aws_subnet.subnet_public["eu-north-1a"].id
@@ -176,12 +178,13 @@ resource "aws_instance" "amazonlinux" {
     
     tags = {
         Name = "amazonlinux"
+        owner = "violetta"        
     }
 }
 
 resource "aws_instance" "ubuntu" {
     #for_each = var.availability_zones
-    ami = "${lookup(var.AMI1, "ubuntu")}"
+    ami = "${lookup(var.AMI1, "vio-ubuntu")}"
     instance_type = var.instance_type
     # VPC
     subnet_id = aws_subnet.subnet_public["eu-north-1b"].id
@@ -193,5 +196,6 @@ resource "aws_instance" "ubuntu" {
 
     tags = {
         Name = "ubuntu"
+        owner = "violetta"
     }
 }
