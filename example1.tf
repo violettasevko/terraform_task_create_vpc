@@ -18,7 +18,7 @@ resource "aws_vpc" "main" {
 
   tags = {
     Name = "main"
-    owner = violetta
+    owner = "violetta"
   }
 }
 
