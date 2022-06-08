@@ -1,9 +1,8 @@
 variable "AMI1" {
     type = map
     default = {
-        AmazonLinux = "ami-0e5a288df830e9b56"
-        #Ubuntu = "ami-0641bed8c0ce71686"
-        #eu-north-1 = "ami-0e5a288df830e9b56"
+        AmazonLinux = "ami-08bdc08970fcbd34a"
+        Ubuntu = "ami-01ded35841bc93d7f"
     }
 }
 
