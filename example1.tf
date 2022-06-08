@@ -4,37 +4,37 @@ resource "aws_vpc" "main" {
   instance_tenancy = "default"
 
   tags = {
-    Name = "main"
+    Name = "lunavpc"
   }
 }
 
-resource "aws_subnet" "subnet-public-1" {
+resource "aws_subnet" "subnet-public" {
+    for_each = var.availability_zones
+
     vpc_id = "${aws_vpc.main.id}"
-    cidr_block = var.subnet_public_1_cidr_block
+
+    availability_zones = each.key
+    cidr_block = cidrsubnet(aws_vpc.main.cidr_block, 8, each.value)
+    ipv6_cidr_block = cidrsubnet(aws_vpc.main.ipv6_cidr_block, 8, each.value + 6)
     map_public_ip_on_launch = "true" //it makes this a public subnet
-    availability_zone = var.subnet_public_1_availability_zone
+    assign_ipv6_address_on_creation = true
+
     tags = {
-        Name = "subnet-public-1"
+        Name = "subnet-public-${each.value}"
     }
 }
 
-resource "aws_subnet" "subnet-public-2" {
+resource "aws_subnet" "subnet-private" {
+    for_each = var.availability_zones
+    
     vpc_id = "${aws_vpc.main.id}"
-    cidr_block = var.subnet_public_2_cidr_block
+    
+    availability_zonУes = each.key
+    cidr_block = cidrsubnet(aws_vpc.main.ipv6_cidr_block, 8, each.value + 10)
     map_public_ip_on_launch = "true" //it makes this a public subnet
-    availability_zone = var.subnet_public_2_availability_zone
+    
     tags = {
-        Name = "subnet-public-2"
-    }
-}
-
-resource "aws_subnet" "subnet-public-3" {
-    vpc_id = "${aws_vpc.main.id}"
-    cidr_block = var.subnet_public_3_cidr_block
-    map_public_ip_on_launch = "true" //it makes this a public subnet
-    availability_zone = var.subnet_public_3_availability_zone
-    tags = {
-        Name = "subnet-public-3"
+        Name = "subnet-private-${each.value + 10}"
     }
 }
 
@@ -60,8 +60,9 @@ resource "aws_route_table" "public-rt" {
     }
 }
 
-resource "aws_route_table_association" "rta-public-subnet-1"{
-    subnet_id = "${aws_subnet.subnet-public-1.id}"
+resource "aws_route_table_association" "rta-public-subnet"{
+    for_each = var.availability_zones
+    subnet_id = aws_subnet.subnet_public[each.key].id
     route_table_id = "${aws_route_table.public-rt.id}"
 }
 
@@ -74,12 +75,14 @@ resource "aws_security_group" "webserver" {
         to_port = 0
         protocol = -1
         cidr_blocks = ["0.0.0.0/0"]
+        description = "access all ipv4"
     }
     egress {
         from_port = 0
         to_port = 0
         protocol = -1
         ipv6_cidr_blocks = ["::/0"]
+        description = "access all ipv6"
     }
     ingress {
         from_port = 22
@@ -89,7 +92,7 @@ resource "aws_security_group" "webserver" {
         // Do not do it in the production. 
         // Put your office or home address in it!
         cidr_blocks = ["0.0.0.0/0"]
-        description = "SSH port"
+        description = "SSH port for all ipv4"
     }
     ingress {
         from_port = 22
@@ -99,7 +102,7 @@ resource "aws_security_group" "webserver" {
         // Do not do it in the production. 
         // Put your office or home address in it!
         ipv6_cidr_blocks = ["::/0"]
-        description = "SSH port"
+        description = "SSH port for all ipv6"
     }
     //If you do not add this rule, you can not reach the NGIX  
     ingress {
@@ -107,14 +110,14 @@ resource "aws_security_group" "webserver" {
         to_port = 80
         protocol = "tcp"
         cidr_blocks = ["0.0.0.0/0"]
-        description = "HTTP port"
+        description = "HTTP port for all ipv4"
     }
     ingress {
         from_port = 80
         to_port = 80
         protocol = "tcp"
         ipv6_cidr_blocks = ["::/0"]
-        description = "HTTP port"
+        description = "HTTP port for all ipv6"
     }
     ingress {
         from_port = 443
@@ -135,24 +138,30 @@ resource "aws_security_group" "webserver" {
     }
 }
 
-#resource "aws_instance" "web1" {
-#    ami = "${lookup(var.AMI, var.AWS_Region)}"
-#    instance_type = var.instance_type
-#    # VPC
-#    subnet_id = "${aws_subnet.subnet-public-1.id}"
-#    # Security Group
-#    vpc_security_group_ids = ["${aws_security_group.webserver.id}"]
-#    # the Public SSH key
-#    key_name = var.web1_key_name
-#}
+resource "aws_instance" "vpcvpc" {
+    ami = "${lookup(var.AMI, var.AWS_Region)}"
+    instance_type = var.instance_type
+    # VPC
+    subnet_id = "${aws_subnet.subnet-public["eu-north-1a"].id}"
+    # Security Group
+    vpc_security_group_ids = ["${aws_security_group.webserver.id}"]
+    # the Public SSH key
+    key_name = var.web1_key_name
+    tags = {
+       Name = "AmazonLinux"
+    }
+}
 #
 #resource "aws_instance" "web2" {
 #    ami = "${lookup(var.AMI, var.AWS_Region)}"
 #    instance_type = var.instance_type
 #    # VPC
-#    subnet_id = "${aws_subnet.subnet-public-1.id}"
+#    subnet_id = "${aws_subnet.subnet-public["eu-central-1b"].id}"
 #    # Security Group
 #    vpc_security_group_ids = ["${aws_security_group.webserver.id}"]
 #    # the Public SSH key
 #    key_name = var.web2_key_name
+#    tags = {
+#       Name = "AmazonLinux"
+#    }
 #}
