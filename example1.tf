@@ -1,14 +1,5 @@
-terraform {
-  required_providers {
-    aws = {
-      source = "hashicorp/aws"
-      version = "4.17.1"    #8-6-2022
-    }
-  }
-}
-
 provider "aws" {
-  # Configuration options
+  region = var.AWS_Region
 }
 
 resource "aws_vpc" "vio-tf-vpc" {    #vpc created by terraform
