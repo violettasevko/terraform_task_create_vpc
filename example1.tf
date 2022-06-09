@@ -1,7 +1,7 @@
 provider "aws" {
   region = var.AWS_Region
 }
-#helllo
+#hello
 
 resource "aws_vpc" "vio-tf-vpc" {    #vpc created by terraform
   cidr_block       = var.vpc_cidr_block
